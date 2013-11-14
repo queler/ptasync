@@ -11,11 +11,16 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Threading;
-using System.Windows.Forms;
-using PTASync;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
+using System.Windows.Forms;
+
+using CalSync2;
+using Google.Apis.Authentication;
+using Google.Apis.Calendar.v3;
+using Google.Apis.Calendar.v3.Data;
+using PTASync;
 
 namespace PTASync
 {
@@ -37,7 +42,7 @@ namespace PTASync
 			// TODO: Add constructor code after the InitializeComponent() call.
 			//
 		}
-
+		CalendarService cs;
 		void Form2Load(object sender, EventArgs e)
 		{
 			//ContextMenu notificationMenu = new ContextMenu(InitializeMenu());
@@ -52,34 +57,66 @@ namespace PTASync
 
 			State = StateEnum.Starting;
 			//notifyIcon1.ContextMenu = notificationMenu;
+			 auth=new frmAuth();
+			 cs=auth.GetService();
+			 Debug.Print(cs.Calendars.Get("primary").Fetch().Id + " " + "to trigger auth");
+			//cs=(CalendarService)auth.Invoke(new CalServiceInvoker(auth.GetService));
+			
 			backgroundWorker1.RunWorkerAsync();
 		}
+		frmAuth auth;
 		const string TITLE_CONFIRM_REPLACE = "Confirm File Replace";
 		const string TITLE_COPYING = "Copying...";
+		delegate CalendarService CalServiceInvoker();
+		int EventComparison (Event x,Event y){
+			
+		
+		/*
+		 * Less than 0  x is less than y.
+
+			0  x equals y.
+
+			Greater than 0 x is greater than y.*/
+		x.ICalUID
+		
+		}
 		void BackgroundWorker1DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
 		{
 
 			backgroundWorker1.ReportProgress(0, "Initializing");
-			FileInfo icalFile = new FileInfo(Environment.GetEnvironmentVariable("temp") + "\\newcal.ics");
-			string httpHost = @"home.comcast.net";
-			string ftpHost = @"upload.comcast.net";
-			string userDir = @"/~queler12";
-			string folderPath = @"/calendar";
-			string user = "queler12";
-			string pass = GetPassword();
-			UriBuilder ftpUri = new UriBuilder("ftp", ftpHost);
-			ftpUri.Path = folderPath;
-			ftpUri.UserName = user;
-			ftpUri.Password = pass;
-			UriBuilder httpUri = new UriBuilder("http", httpHost);
-            httpUri.Path = userDir + folderPath + '/' + icalFile.Name;
+			string calId=GetId();
+			Events gAppts=cs.Events.List(calId).Fetch();
+			List<Events> sortedGAppts= new List<Events>(gAppts);
+			sortedGAppts.Sort(new Comparison<Events>(
+//			FileInfo icalFile = new FileInfo(Environment.GetEnvironmentVariable("temp") + "\\newcal.ics");
+//			string httpHost = @"home.comcast.net";
+//			string ftpHost = @"upload.comcast.net";
+//			string userDir = @"/~queler12";
+//			string folderPath = @"/calendar";
+//			string user = "queler12";
+//			string pass = GetPassword();
+//			UriBuilder ftpUri = new UriBuilder("ftp", ftpHost);
+//			ftpUri.Path = folderPath;
+//			ftpUri.UserName = user;
+//			ftpUri.Password = pass;
+//			UriBuilder httpUri = new UriBuilder("http", httpHost);
+//            httpUri.Path = userDir + folderPath + '/' + icalFile.Name;
+            
+            
+/*            
             backgroundWorker1.ReportProgress(0, "Saving");
             this.State = StateEnum.Working;
+            
+            
             Core.SaveCalendarToDisk(icalFile.ToString());
+            
+            
             backgroundWorker1.ReportProgress(0,"Fixing");
             Core.TzFix(icalFile.ToString());
+            
             backgroundWorker1.ReportProgress(0,"fixed");
             this.State = StateEnum.Up;
+            
             backgroundWorker1.ReportProgress(0, "deleting");
             
             
@@ -87,10 +124,47 @@ namespace PTASync
            backgroundWorker1.ReportProgress(0, delRes ?? "");
             backgroundWorker1.ReportProgress(0, "Uploading");
 
-             Core.UploadToFtp(ftpUri.Uri,httpUri.Uri, icalFile, backgroundWorker1);
+             Core.UploadToFtp(ftpUri.Uri,httpUri.Uri, icalFile, backgroundWorker1);*/
 			 
 		}
-
+		internal string GetId()
+		{
+			string c=Settings.Default.CalId;
+			if ((c ?? "") != "")
+			{
+				return c;
+			}
+			else
+			{
+				Form frmPass = new Form();
+				frmPass.Text = "Calendar ID?";
+				TextBox tb = new TextBox();
+				Button ok = new Button();
+				ok.Text = "Ok";
+				ok.Dock = DockStyle.Bottom;
+				tb.Dock = DockStyle.Top;
+				ok.DialogResult = DialogResult.OK;
+				frmPass.AcceptButton = ok;
+				tb.UseSystemPasswordChar = false;
+				frmPass.Controls.Add(tb);
+				frmPass.Controls.Add(ok);
+				DialogResult res = frmPass.ShowDialog();
+				if (res==DialogResult.OK)
+				{
+					Settings.Default.CalId = tb.Text;
+					Settings.Default.Save();
+					
+					tb.Dispose();
+					frmPass.Dispose();
+					return tb.Text;
+				}
+				else
+				{
+					Settings.Default.PASS_SET = false;
+					throw new NullReferenceException("No password set");
+				}
+			}
+		}
 		internal static string GetPassword()
 		{
 			if (Settings.Default.PASS_SET)

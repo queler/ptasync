@@ -29,7 +29,7 @@ namespace PTASync
 			
 		}
 
-
+		[STAThread]
         private static void FormMain()
         {
             Application.EnableVisualStyles();
