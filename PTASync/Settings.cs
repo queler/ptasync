@@ -51,6 +51,18 @@ namespace PTASync
             [System.Diagnostics.DebuggerStepThrough()]
             set { this["Password"] = EncryptString((value)); PASS_SET = true; }
         }
+       [UserScopedSettingAttribute()]
+        [DefaultSettingValueAttribute("")]
+        public string CalId
+        {
+            [System.Diagnostics.DebuggerStepThrough()]
+            get
+            {
+            	return (string) this["CalId"];
+            }
+            [System.Diagnostics.DebuggerStepThrough()]
+            set { this["Password"] = value;}
+        }
         static byte[] entropy = System.Text.Encoding.Unicode.GetBytes("Bumblebee Tuna, I can see your balls!");
 
         public static string EncryptString(string input)

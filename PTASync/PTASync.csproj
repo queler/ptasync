@@ -32,6 +32,7 @@
     <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
     <NoStdLib>False</NoStdLib>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <StartupObject>PTASync.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -77,6 +78,18 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DotNetOpenAuth">
+      <HintPath>..\..\..\..\..\docs\unzipped\google-calendar-v3-rev27-csharp-1.2.0-beta\calendar\Lib\DotNetOpenAuth.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Apis">
+      <HintPath>..\..\..\..\..\docs\unzipped\google-calendar-v3-rev27-csharp-1.2.0-beta\calendar\Lib\Google.Apis.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Apis.Authentication.OAuth2">
+      <HintPath>..\..\..\..\..\docs\unzipped\google-calendar-v3-rev27-csharp-1.2.0-beta\calendar\Lib\Google.Apis.Authentication.OAuth2.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Apis.Calendar.v3">
+      <HintPath>..\..\..\..\..\docs\unzipped\google-calendar-v3-rev27-csharp-1.2.0-beta\calendar\Google.Apis.Calendar.v3.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Office.Interop.Outlook" />
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -94,11 +107,18 @@
     <Compile Include="Form2.designer.cs">
       <DependentUpon>Form2.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmAuth.cs" />
+    <Compile Include="frmAuth.Designer.cs">
+      <DependentUpon>frmAuth.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form2.resx">
       <DependentUpon>Form2.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmAuth.resx">
+      <DependentUpon>frmAuth.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources.resx">
       <SubType>Designer</SubType>
@@ -135,6 +155,14 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+    <COMReference Include="MSHTML">
+      <Guid>{3050F1C5-98B5-11CF-BB82-00AA00BDCE0B}</Guid>
+      <VersionMajor>4</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+    </COMReference>
     <COMReference Include="Shell32">
       <Guid>{50A7E9B0-70EF-11D1-B75A-00A0C90564FE}</Guid>
       <VersionMajor>1</VersionMajor>
