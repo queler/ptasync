@@ -68,17 +68,13 @@ namespace PTASync
 		const string TITLE_CONFIRM_REPLACE = "Confirm File Replace";
 		const string TITLE_COPYING = "Copying...";
 		delegate CalendarService CalServiceInvoker();
-		int EventComparison (Event x,Event y){
-			
-		
-		/*
-		 * Less than 0  x is less than y.
-
-			0  x equals y.
-
-			Greater than 0 x is greater than y.*/
-		x.ICalUID
-		
+		int EventComparison (Event x,Event y){		
+			/*
+			 * Less than 0  x is less than y.
+				0  x equals y.
+				Greater than 0 x is greater than y.*/
+			int r=x.ICalUID.CompareTo(y.ICalUID);
+			return r;
 		}
 		void BackgroundWorker1DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
 		{
@@ -86,8 +82,15 @@ namespace PTASync
 			backgroundWorker1.ReportProgress(0, "Initializing");
 			string calId=GetId();
 			Events gAppts=cs.Events.List(calId).Fetch();
-			List<Events> sortedGAppts= new List<Events>(gAppts);
-			sortedGAppts.Sort(new Comparison<Events>(
+			List<Event> sortedGAppts= new List<Event>(gAppts.Items);
+			sortedGAppts.Sort(new Comparison<Event>(EventComparison));
+			using (StreamWriter sw=File.CreateText(Path.GetTempFileName()))
+			{
+				for (int i=0; i<sortedGAppts.Count;i++ ) {
+					Event ev=sortedGAppts[i];
+					sw.WriteLine(string.Format("{0}\t{1}\t{2}",ev.ICalUID,ev.Start.ToString(),ev.Summary));
+				}
+			}
 //			FileInfo icalFile = new FileInfo(Environment.GetEnvironmentVariable("temp") + "\\newcal.ics");
 //			string httpHost = @"home.comcast.net";
 //			string ftpHost = @"upload.comcast.net";

@@ -32,7 +32,7 @@
     <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
     <NoStdLib>False</NoStdLib>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <StartupObject>PTASync.Program</StartupObject>
+    <StartupObject>PTASync.Schedule</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -90,6 +90,7 @@
     <Reference Include="Google.Apis.Calendar.v3">
       <HintPath>..\..\..\..\..\docs\unzipped\google-calendar-v3-rev27-csharp-1.2.0-beta\calendar\Google.Apis.Calendar.v3.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel" />
     <Reference Include="Microsoft.Office.Interop.Outlook" />
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -132,6 +133,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Schedule.cs" />
     <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
