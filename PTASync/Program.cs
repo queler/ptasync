@@ -17,38 +17,35 @@ using System.Windows.Forms;
 
 namespace PTASync
 {
-	public sealed class Program
-	{
-		#region Main - Program entry point
-		/// <summary>Program entry point.</summary>
-		/// <param name="args">Command Line Arguments</param>
-		[STAThread]
-		public static void Main(string[] args)
-		{
-			FormMain();
-			
-		}
+    public sealed class Program
+    {
+        #region Main - Program entry point
+        /// <summary>Program entry point.</summary>
+        /// <param name="args">Command Line Arguments</param>
+        [STAThread]
+        public static void Main(string[] args)
+        {
+            FormMain();
 
-		[STAThread]
+        }
+
+        [STAThread]
         private static void FormMain()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form2());
         }
-        static void deltest()
-	{
-		PTASync.Core.delTest();
-	}
-	}
 
-	#endregion
-	
+    }
 
-	public enum StateEnum
-	{
-		Starting,Working,Up,Done,Error
-	}
+        #endregion
+
+
+    public enum StateEnum
+    {
+        Starting, Working, Up, Done, Error
+    }
 }
 //
 
