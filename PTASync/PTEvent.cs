@@ -24,7 +24,7 @@ namespace PTASync
         
         public TimeSpan Duration
         {
-            get { return Start-End; }
+            get { return End-Start; }
             set { End=Start+value; }
         }
         String titleRaw;
@@ -34,12 +34,11 @@ namespace PTASync
             get { return titleRaw; }
             set { titleRaw = value; }
         }
-        String titleOut;
 
         public String TitleOut
         {
-            get { return titleOut; }
-            set { titleOut = value; }
+            get { return TitleRaw; }
+            set { throw new NotImplementedException();}
         }
         String location;
 
@@ -64,7 +63,7 @@ namespace PTASync
         }
         public override string ToString()
         {
-            return Start+":"+TitleOut+":"+End;
+            return Start+";"+End+";"+TitleOut+";"+Trainer+";"+Location;
         }
     }
 }
