@@ -18,8 +18,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 
-using Microsoft.Office.Interop.Outlook;
-using Outlook = Microsoft.Office.Interop.Outlook;
 
 namespace PTASync
 {
@@ -28,7 +26,6 @@ namespace PTASync
 	/// </summary>
 	public static class Core
 	{
-		static Outlook.Application oApp = new Outlook.ApplicationClass();
 		static Core()
 		{
 
@@ -79,68 +76,6 @@ namespace PTASync
 		/// </summary>
 		/// <see cref="http://msdn.microsoft.com/en-us/library/office/bb647583%28v=office.14%29.aspx">
 		/// <param name="calendarFileName"></param>
-		public static void SaveCalendarToDisk(string calendarFileName)
-		{
-			if (string.IsNullOrEmpty(calendarFileName))
-				throw new ArgumentException("calendarFileName",
-				                            "Parameter must contain a value.");
-
-			
-			Outlook.Folder calendar = oApp.Session.GetDefaultFolder(
-				Outlook.OlDefaultFolders.olFolderCalendar) as Outlook.Folder;
-			AppointmentItem updated=(AppointmentItem)oApp.CreateItem(OlItemType.olAppointmentItem);
-				updated.Start=DateTime.Now;
-				updated.Duration=0;
-				updated.AllDayEvent=false;
-				updated.BusyStatus= OlBusyStatus.olFree;
-				updated.ReminderSet=false;
-				updated.Subject="***UPDATED***";
-					
-				updated.Save();
-			
-			Outlook.CalendarSharing exporter = calendar.GetCalendarExporter();
-
-			// Set the properties for the export
-			exporter.CalendarDetail = Outlook.OlCalendarDetail.olFullDetails;
-			exporter.IncludeAttachments = true;
-			exporter.IncludePrivateDetails = true;
-			exporter.RestrictToWorkingHours = false;
-			exporter.IncludeWholeCalendar = true;
-
-
-			// Save the calendar to disk
-			exporter.SaveAsICal(calendarFileName);
-			//updated.Delete();
-			permDel(updated);
-				Marshal.ReleaseComObject(updated);
-		}
-		public static void permDel(AppointmentItem item)
-		{
-			MAPIFolder calItems=(MAPIFolder)item.Parent;
-			for (int i=1;i<=calItems.Items.Count ;i++ ) {
-				string testuid=item.GetType().InvokeMember("EntryID",BindingFlags.GetProperty,null,calItems.Items[i],null).ToString();
-				if (testuid==item.EntryID) {
-					calItems.Items.Remove(i);
-					return;
-				}
-			}
-			throw new ApplicationException("Adam can't program");
-		}
-		public static void delTest()
-		{
-			Outlook.Folder calendar = oApp.Session.GetDefaultFolder(
-				Outlook.OlDefaultFolders.olFolderCalendar) as Outlook.Folder;
-			AppointmentItem updated=(AppointmentItem)oApp.CreateItem(OlItemType.olAppointmentItem);
-				updated.Start=DateTime.Now;
-				updated.Duration=0;
-				updated.AllDayEvent=false;
-				updated.BusyStatus= OlBusyStatus.olFree;
-				updated.ReminderSet=false;
-				updated.Subject="***Calendar Updated***";
-					
-				updated.Save();
-				permDel(updated);
-		}
 		public static void UploadToFtp(Uri ftpUrl, Uri httpUri, FileInfo f, BackgroundWorker bw)
 		{
 			Shell32.ShellClass shell = new Shell32.ShellClass();
