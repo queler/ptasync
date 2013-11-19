@@ -49,7 +49,7 @@ namespace PTASync
 			{
 				try
 				{
-			xl.Visible = true;
+//			xl.Visible = true;
 			Workbook book = xl.Workbooks.Open(file,
 			                                  0, true, missing, missing, missing, missing, missing,
 			                                  missing, missing, missing, missing, missing, missing, missing);
@@ -237,6 +237,8 @@ namespace PTASync
         public void ToIcalFile(string filename)
         {
             iCalendar ical = new iCalendar();
+            ical.AddLocalTimeZone();
+            //ical.Name="PTAcadamy";
             foreach (IEvent evt in this.Events)
             {
                 Event icalEvent = ical.Create<Event>();
@@ -260,10 +262,10 @@ namespace PTASync
 		static void Main()
 		{
 			Schedule s=new Schedule();
-			//s.ReadFromXL(@"\\w-pattr-002\AcademyDocs\USPTA_schedules\Nov_4th_Entry-Level-Phase 1_Training _Schedule 10-21-13.xls");
-			s.ReadFromXL(@"\\quelertime\shareddocs\tashed.xlsb");
+			s.ReadFromXL(@"\\w-pattr-002\AcademyDocs\USPTA_schedules\Nov_4th_Entry-Level-Phase 1_Training _Schedule 10-21-13.xls");
+			//s.ReadFromXL(@"\\quelertime\shareddocs\tashed.xlsb");
             s.ToIcalFile(Path.GetTempPath() + Path.DirectorySeparatorChar + @"sked.ics");
-
+			
 		}
 	}
 	

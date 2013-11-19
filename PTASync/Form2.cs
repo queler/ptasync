@@ -16,12 +16,6 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
-using CalSync2;
-using Google.Apis.Authentication;
-using Google.Apis.Calendar.v3;
-using Google.Apis.Calendar.v3.Data;
-using PTASync;
-
 namespace PTASync
 {
 	/// <summary>
@@ -42,7 +36,7 @@ namespace PTASync
 			// TODO: Add constructor code after the InitializeComponent() call.
 			//
 		}
-		CalendarService cs;
+//		CalendarService cs;
 		void Form2Load(object sender, EventArgs e)
 		{
 			//ContextMenu notificationMenu = new ContextMenu(InitializeMenu());
@@ -55,64 +49,65 @@ namespace PTASync
 			images.Add(StateEnum.Starting, Resources.cal);
 			images.Add(StateEnum.Up, Resources.upload);
 
-			State = StateEnum.Starting;
-			//notifyIcon1.ContextMenu = notificationMenu;
-			 auth=new frmAuth();
-			 cs=auth.GetService();
-			 Debug.Print(cs.Calendars.Get("primary").Fetch().Id + " " + "to trigger auth");
-			//cs=(CalendarService)auth.Invoke(new CalServiceInvoker(auth.GetService));
-			
+//			State = StateEnum.Starting;
+//			//notifyIcon1.ContextMenu = notificationMenu;
+//			 auth=new frmAuth();
+//			 cs=auth.GetService();
+//			 Debug.Print(cs.Calendars.Get("primary").Fetch().Id + " " + "to trigger auth");
+//			//cs=(CalendarService)auth.Invoke(new CalServiceInvoker(auth.GetService));
+//			
 			backgroundWorker1.RunWorkerAsync();
 		}
-		frmAuth auth;
+		//frmAuth auth;
 		const string TITLE_CONFIRM_REPLACE = "Confirm File Replace";
 		const string TITLE_COPYING = "Copying...";
-		delegate CalendarService CalServiceInvoker();
-		int EventComparison (Event x,Event y){		
-			/*
-			 * Less than 0  x is less than y.
-				0  x equals y.
-				Greater than 0 x is greater than y.*/
-			int r=x.ICalUID.CompareTo(y.ICalUID);
-			return r;
-		}
+////		delegate CalendarService CalServiceInvoker();
+//		int EventComparison (Event x,Event y){		
+//			/*
+//			 * Less than 0  x is less than y.
+//				0  x equals y.
+//				Greater than 0 x is greater than y.*/
+//			int r=x.ICalUID.CompareTo(y.ICalUID);
+//			return r;
+//		}
 		void BackgroundWorker1DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
 		{
 
 			backgroundWorker1.ReportProgress(0, "Initializing");
-			string calId=GetId();
-			Events gAppts=cs.Events.List(calId).Fetch();
-			List<Event> sortedGAppts= new List<Event>(gAppts.Items);
-			sortedGAppts.Sort(new Comparison<Event>(EventComparison));
-			using (StreamWriter sw=File.CreateText(Path.GetTempFileName()))
-			{
-				for (int i=0; i<sortedGAppts.Count;i++ ) {
-					Event ev=sortedGAppts[i];
-					sw.WriteLine(string.Format("{0}\t{1}\t{2}",ev.ICalUID,ev.Start.ToString(),ev.Summary));
-				}
-			}
-//			FileInfo icalFile = new FileInfo(Environment.GetEnvironmentVariable("temp") + "\\newcal.ics");
-//			string httpHost = @"home.comcast.net";
-//			string ftpHost = @"upload.comcast.net";
-//			string userDir = @"/~queler12";
-//			string folderPath = @"/calendar";
-//			string user = "queler12";
-//			string pass = GetPassword();
-//			UriBuilder ftpUri = new UriBuilder("ftp", ftpHost);
-//			ftpUri.Path = folderPath;
-//			ftpUri.UserName = user;
-//			ftpUri.Password = pass;
-//			UriBuilder httpUri = new UriBuilder("http", httpHost);
-//            httpUri.Path = userDir + folderPath + '/' + icalFile.Name;
+			state= StateEnum.Starting;
+			Schedule s=new Schedule();
+			backgroundWorker1.ReportProgress(10,"Reading XL");
+			this.State=StateEnum.Working;
+			s.ReadFromXL(@"\\w-pattr-002\AcademyDocs\USPTA_schedules\Nov_4th_Entry-Level-Phase 1_Training _Schedule 10-21-13.xls");
+			//s.ReadFromXL(@"\\quelertime\shareddocs\tashed.xlsb");
+			backgroundWorker1.ReportProgress(30,"Exporting to ics");
+   			FileInfo icalFile = new FileInfo(Environment.GetEnvironmentVariable("temp") + "\\newcal.ics");
+   			s.ToIcalFile(icalFile.FullName);
+			
+			string httpHost = @"home.comcast.net";
+			string ftpHost = @"upload.comcast.net";
+			string userDir = @"/~queler12";
+			string folderPath = @"/calendar";
+			string user = "queler12";
+			string pass = GetPassword();
+			UriBuilder ftpUri = new UriBuilder("ftp", ftpHost);
+			ftpUri.Path = folderPath;
+			ftpUri.UserName = user;
+			ftpUri.Password = pass;
+			UriBuilder httpUri = new UriBuilder("http", httpHost);
+            httpUri.Path = userDir + folderPath + '/' + icalFile.Name;
+            this.State = StateEnum.Up;
             
+            backgroundWorker1.ReportProgress(0, "deleting");
+            
+            
+            string delRes = Core.DeleteNet(ftpUri.Uri, icalFile);
+           backgroundWorker1.ReportProgress(0, delRes ?? "");
+            backgroundWorker1.ReportProgress(0, "Uploading");
+
+             Core.UploadToFtp(ftpUri.Uri,httpUri.Uri, icalFile, backgroundWorker1);
             
 /*            
-            backgroundWorker1.ReportProgress(0, "Saving");
-            this.State = StateEnum.Working;
-            
-            
-            Core.SaveCalendarToDisk(icalFile.ToString());
-            
             
             backgroundWorker1.ReportProgress(0,"Fixing");
             Core.TzFix(icalFile.ToString());
