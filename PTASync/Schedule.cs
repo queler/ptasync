@@ -12,9 +12,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-
-using Google.Apis.Calendar.v3.Data;
 using Microsoft.Office.Interop.Excel;
+using DDay.iCal;
+using DDay.iCal.Serialization.iCalendar;
 
 namespace PTASync
 {
@@ -234,12 +234,35 @@ namespace PTASync
 				}
 			}
 		}
+        public void ToIcalFile(string filename)
+        {
+            iCalendar ical = new iCalendar();
+            foreach (IEvent evt in this.Events)
+            {
+                Event icalEvent = ical.Create<Event>();
+                icalEvent.Start = new iCalDateTime( evt.Start);
+                icalEvent.Summary = evt.TitleOut;
+                if (evt.AllDay)
+                {
+                    icalEvent.IsAllDay = true;
+                }
+                else
+                {
+                    icalEvent.End = new iCalDateTime( evt.End);
+                }
+                icalEvent.Description = "Trainer:" + evt.Trainer;
+                icalEvent.Location = evt.Location;
+            }
+         
+            iCalendarSerializer writer = new iCalendarSerializer();
+            writer.Serialize(ical,filename);
+        }
 		static void Main()
 		{
 			Schedule s=new Schedule();
-			s.ReadFromXL(@"\\w-pattr-002\AcademyDocs\USPTA_schedules\Nov_4th_Entry-Level-Phase 1_Training _Schedule 10-21-13.xls");
-			//@"\\quelertime\shareddocs\tashed.xlsb");
-			s.Dump(Path.GetTempFileName());
+			//s.ReadFromXL(@"\\w-pattr-002\AcademyDocs\USPTA_schedules\Nov_4th_Entry-Level-Phase 1_Training _Schedule 10-21-13.xls");
+			s.ReadFromXL(@"\\quelertime\shareddocs\tashed.xlsb");
+            s.ToIcalFile(Path.GetTempPath() + Path.DirectorySeparatorChar + @"sked.ics");
 
 		}
 	}

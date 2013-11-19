@@ -12,14 +12,33 @@ namespace PTASync
         public DateTime Start
         {
             get { return start; }
-            set { start = value; }
+            set
+            {
+                if (AllDay)
+                {
+
+                    start = value.Date;
+                }
+                else
+                {
+                    start = value;
+                }
+            }
         }
         DateTime end;
 
         public DateTime End
         {
             get { return end; }
-            set { end = value; }
+            set {
+                if (AllDay)
+                {
+                    end = value.Date;
+                }
+                else{
+                    end = value; 
+                }
+            }
         }
         
         public TimeSpan Duration
@@ -52,7 +71,12 @@ namespace PTASync
         public bool AllDay
         {
             get { return allDay; }
-            set { allDay = value; }
+            set { 
+                allDay = value;
+                Start = Start.Date;
+                End = End.Date;
+
+            }
         }
         string trainer;
 
