@@ -46,7 +46,7 @@ namespace PTASync
             get { return End-Start; }
             set { End=Start+value; }
         }
-        String titleRaw;
+        String titleRaw="";
 
         public String TitleRaw
         {
@@ -56,10 +56,19 @@ namespace PTASync
 
         public String TitleOut
         {
-            get { return TitleRaw; }
+            get { 
+        		string prefix="";
+        		if (Trainer.ToLower().Contains("trainer")) {
+        			prefix="$";
+        		}
+        		if (Trainer.ToLower().Contains("leslie") || Trainer.ToLower().Contains("gary")){
+        			prefix="#";
+        		}
+        		return prefix+ TitleRaw;
+        	}
             set { throw new NotImplementedException();}
         }
-        String location;
+        String location="";
 
         public String Location
         {
@@ -78,7 +87,7 @@ namespace PTASync
 
             }
         }
-        string trainer;
+        string trainer="";
 
         public string Trainer
         {
