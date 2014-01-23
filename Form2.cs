@@ -76,14 +76,68 @@ namespace PTASync
 			FileInfo icalFile = createIcalFile();
 			ProcessStartInfo psi=new ProcessStartInfo();
 			//java -cp "lib\gdlib\*;." IcalRemoteUserPass C:\Users\aqueler\AppData\Local\Temp\newcal.ics https://www.google.com/calendar/ical/3c74a7m3h6dqvtb5mltalqfa24%40group.calendar.google.com/private-e83945b635f57e5536bfdb75414538bd/basic.ics queler@gmail.com killr0bb
+			string installPath = GetJavaInstallationPath();
+			string javaPath = System.IO.Path.Combine(installPath, "bin\\Java.exe");
+			if (!System.IO.File.Exists(javaPath))
+			{
+				throw new ApplicationException("Java not found");
+			}
+			psi.FileName=javaPath;
+			psi.UseShellExecute=false;
+			psi.RedirectStandardOutput=true;
+			psi.RedirectStandardError=true;
+			psi.WorkingDirectory=Environment.CurrentDirectory;
+			string execPath=Environment.CurrentDirectory;
+			string calid=GetId();
+			string user=GetGName();
+			string pass=GetPassword();
+			psi.Arguments=String.Format("-cp \"{0}\\*;.\" IcalRemoteUserPass {1} {2} {3} {4}",execPath,icalFile,calid,user,pass);
+			Process p=new Process();
+		
+			p.OutputDataReceived+= new DataReceivedEventHandler(p_OutputDataReceived);
+			p.ErrorDataReceived+= new DataReceivedEventHandler(p_OutputDataReceived);
+			this.State=StateEnum.Up;
+			
+				p.StartInfo=psi;
+			
+				p.Start();
+				p.BeginOutputReadLine();
+				p.WaitForExit();
+				if (p.ExitCode!=0) {
+					throw new ApplicationException("Error in java program");
+				}
 			
 			
+		}
+
+		void p_OutputDataReceived(object sender, DataReceivedEventArgs e)
+		{
+			backgroundWorker1.ReportProgress(1,e.Data);
+		}
+		private string GetJavaInstallationPath()
+		{
+		    string environmentPath = Environment.GetEnvironmentVariable("JAVA_HOME");
+		    if (!string.IsNullOrEmpty(environmentPath))
+		    {
+		       return environmentPath;
+		    }
+		
+		    string javaKey = "SOFTWARE\\JavaSoft\\Java Runtime Environment\\";
+		    using (Microsoft.Win32.RegistryKey rk = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(javaKey))
+		    {
+		        string currentVersion = rk.GetValue("CurrentVersion").ToString();
+		        using (Microsoft.Win32.RegistryKey key = rk.OpenSubKey(currentVersion))
+		        {
+		            return key.GetValue("JavaHome").ToString();
+		        }
+		    }
 		}
 		void BackgroundWorker1DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
 		{
 
-			
-			FileInfo icalFile = createIcalFile();
+			throw new NotImplementedException();
+			/*
+			  FileInfo icalFile = createIcalFile();
 			string httpHost = @"home.comcast.net";
 			string ftpHost = @"upload.comcast.net";
 			string userDir = @"/~queler12";
@@ -174,8 +228,44 @@ namespace PTASync
 				}
 				else
 				{
-					Settings.Default.PASS_SET = false;
-					throw new NullReferenceException("No password set");
+					throw new NullReferenceException("No Calendar set");
+				}
+			}
+		}
+		internal string GetGName()
+		{
+			string c=Settings.Default.GName;
+			if ((c ?? "") != "")
+			{
+				return c;
+			}
+			else
+			{
+				Form frmPass = new Form();
+				frmPass.Text = "Google Id?";
+				TextBox tb = new TextBox();
+				Button ok = new Button();
+				ok.Text = "Ok";
+				ok.Dock = DockStyle.Bottom;
+				tb.Dock = DockStyle.Top;
+				ok.DialogResult = DialogResult.OK;
+				frmPass.AcceptButton = ok;
+				tb.UseSystemPasswordChar = false;
+				frmPass.Controls.Add(tb);
+				frmPass.Controls.Add(ok);
+				DialogResult res = frmPass.ShowDialog();
+				if (res==DialogResult.OK)
+				{
+					Settings.Default.GName = tb.Text;
+					Settings.Default.Save();
+					
+					tb.Dispose();
+					frmPass.Dispose();
+					return tb.Text;
+				}
+				else
+				{
+					throw new NullReferenceException("No Gmail Name set");
 				}
 			}
 		}
@@ -235,8 +325,9 @@ namespace PTASync
 
 		public void Status(string text)
 		{
-			textBox1.Text += DateTime.Now.ToString() + ":" + text + "\r\n";
-			notifyIcon1.Text=text;
+			textBox1.AppendText( DateTime.Now.ToString() + ":" + text + "\r\n");
+			
+			notifyIcon1.Text=State.ToString();
 		}
 
 		void BackgroundWorker1ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
@@ -283,7 +374,11 @@ namespace PTASync
 
 		private void timer1_Tick(object sender, EventArgs e)
 		{
-			Application.Exit();
+			if (this.Visible) {
+				
+			}
+			else
+			{Application.Exit();}
 		}
 		
 		void Form2Shown(object sender, EventArgs e)

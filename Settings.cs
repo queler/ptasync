@@ -61,7 +61,19 @@ namespace PTASync
             	return (string) this["CalId"];
             }
             [System.Diagnostics.DebuggerStepThrough()]
-            set { this["Password"] = value;}
+            set { this["CalId"] = value;}
+        }
+        [UserScopedSettingAttribute()]
+        [DefaultSettingValueAttribute("")]
+        public string GName
+        {
+            [System.Diagnostics.DebuggerStepThrough()]
+            get
+            {
+            	return (string) this["GName"];
+            }
+            [System.Diagnostics.DebuggerStepThrough()]
+            set { this["GName"] = value;}
         }
         static byte[] entropy = System.Text.Encoding.Unicode.GetBytes("Bumblebee Tuna, I can see your balls!");
 
