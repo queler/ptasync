@@ -16,6 +16,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
+
 namespace PTASync
 {
 	/// <summary>
@@ -55,14 +56,14 @@ namespace PTASync
 //			 cs=auth.GetService();
 //			 Debug.Print(cs.Calendars.Get("primary").Fetch().Id + " " + "to trigger auth");
 //			//cs=(CalendarService)auth.Invoke(new CalServiceInvoker(auth.GetService));
-//			
+//
 			backgroundWorker1.RunWorkerAsync();
 		}
 		//frmAuth auth;
 		const string TITLE_CONFIRM_REPLACE = "Confirm File Replace";
 		const string TITLE_COPYING = "Copying...";
-////		delegate CalendarService CalServiceInvoker();
-//		int EventComparison (Event x,Event y){		
+		////		delegate CalendarService CalServiceInvoker();
+//		int EventComparison (Event x,Event y){
 //			/*
 //			 * Less than 0  x is less than y.
 //				0  x equals y.
@@ -70,20 +71,19 @@ namespace PTASync
 //			int r=x.ICalUID.CompareTo(y.ICalUID);
 //			return r;
 //		}
+		void BackgroundWorker1DoWorkSync(object sender, System.ComponentModel.DoWorkEventArgs e)
+		{
+			FileInfo icalFile = createIcalFile();
+			ProcessStartInfo psi=new ProcessStartInfo();
+			//java -cp "lib\gdlib\*;." IcalRemoteUserPass C:\Users\aqueler\AppData\Local\Temp\newcal.ics https://www.google.com/calendar/ical/3c74a7m3h6dqvtb5mltalqfa24%40group.calendar.google.com/private-e83945b635f57e5536bfdb75414538bd/basic.ics queler@gmail.com killr0bb
+			
+			
+		}
 		void BackgroundWorker1DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
 		{
 
-			backgroundWorker1.ReportProgress(0, "Initializing");
-			state= StateEnum.Starting;
-			Schedule s=new Schedule();
-			backgroundWorker1.ReportProgress(10,"Reading XL");
-			this.State=StateEnum.Working;
-			s.ReadFromXL(@"\\w-pattr-002\AcademyDocs\USPTA_schedules\Nov_4th_Entry-Level-Phase 1_Training _Schedule 10-21-13.xls");
-			//s.ReadFromXL(@"\\quelertime\shareddocs\tashed.xlsb");
-			backgroundWorker1.ReportProgress(30,"Exporting to ics");
-   			FileInfo icalFile = new FileInfo(Environment.GetEnvironmentVariable("temp") + "\\newcal.ics");
-   			s.ToIcalFile(icalFile.FullName);
 			
+			FileInfo icalFile = createIcalFile();
 			string httpHost = @"home.comcast.net";
 			string ftpHost = @"upload.comcast.net";
 			string userDir = @"/~queler12";
@@ -95,19 +95,19 @@ namespace PTASync
 			ftpUri.UserName = user;
 			ftpUri.Password = pass;
 			UriBuilder httpUri = new UriBuilder("http", httpHost);
-            httpUri.Path = userDir + folderPath + '/' + icalFile.Name;
-            this.State = StateEnum.Up;
-            
-            backgroundWorker1.ReportProgress(0, "deleting");
-            
-            
-            string delRes = Core.DeleteNet(ftpUri.Uri, icalFile);
-           backgroundWorker1.ReportProgress(0, delRes ?? "");
-            backgroundWorker1.ReportProgress(0, "Uploading");
+			httpUri.Path = userDir + folderPath + '/' + icalFile.Name;
+			this.State = StateEnum.Up;
+			
+			backgroundWorker1.ReportProgress(0, "deleting");
+			
+			
+			string delRes = Core.DeleteNet(ftpUri.Uri, icalFile);
+			backgroundWorker1.ReportProgress(0, delRes ?? "");
+			backgroundWorker1.ReportProgress(0, "Uploading");
 
-             Core.UploadToFtp(ftpUri.Uri,httpUri.Uri, icalFile, backgroundWorker1);
-            
-/*            
+			Core.UploadToFtp(ftpUri.Uri,httpUri.Uri, icalFile, backgroundWorker1);
+			
+			/*
             
             backgroundWorker1.ReportProgress(0,"Fixing");
             Core.TzFix(icalFile.ToString());
@@ -123,7 +123,23 @@ namespace PTASync
             backgroundWorker1.ReportProgress(0, "Uploading");
 
              Core.UploadToFtp(ftpUri.Uri,httpUri.Uri, icalFile, backgroundWorker1);*/
-			 
+			
+		}
+
+		//s.ReadFromXL(@"\\quelertime\shareddocs\tashed.xlsb");
+
+		FileInfo createIcalFile()
+		{
+			backgroundWorker1.ReportProgress(0, "Initializing");
+			state = StateEnum.Starting;
+			Schedule s = new Schedule();
+			backgroundWorker1.ReportProgress(10, "Reading XL");
+			this.State = StateEnum.Working;
+			s.ReadFromXL("\\\\w-pattr-002\\AcademyDocs\\USPTA_schedules\\Nov_4th_Entry-Level-Phase 1_Training _Schedule 10-21-13.xls");
+			backgroundWorker1.ReportProgress(30, "Exporting to ics");
+			FileInfo icalFile = new FileInfo(Environment.GetEnvironmentVariable("temp") + "\\newcal.ics");
+			s.ToIcalFile(icalFile.FullName);
+			return icalFile;
 		}
 		internal string GetId()
 		{
