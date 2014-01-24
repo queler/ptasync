@@ -181,15 +181,36 @@ namespace PTASync
 		}
 
 		//s.ReadFromXL(@"\\quelertime\shareddocs\tashed.xlsb");
-
+		
 		FileInfo createIcalFile()
 		{
+			string xlFile=System.Configuration.ConfigurationManager.AppSettings["schedulePath"];
+			string[] deb=Environment.GetCommandLineArgs();
+			if (Environment.GetCommandLineArgs().Length>1)
+			{
+				string arg0=Environment.GetCommandLineArgs()[1];
+				if(File.Exists(arg0)) {
+					backgroundWorker1.ReportProgress(0,"using "+arg0);
+					xlFile=arg0;
+				}
+				else
+				{
+					backgroundWorker1.ReportProgress(0,arg0+" doesn't exist/isn't a valid file, reading app.config for path");
+					
+				}
+				
+			}
+			else
+			{
+				backgroundWorker1.ReportProgress(0,"No commandline, reading app.config for path");
+			}
+			
 			backgroundWorker1.ReportProgress(0, "Initializing");
 			state = StateEnum.Starting;
 			Schedule s = new Schedule();
 			backgroundWorker1.ReportProgress(10, "Reading XL");
 			this.State = StateEnum.Working;
-			s.ReadFromXL("\\\\w-pattr-002\\AcademyDocs\\USPTA_schedules\\Nov_4th_Entry-Level-Phase 1_Training _Schedule 10-21-13.xls");
+			s.ReadFromXL(xlFile);
 			backgroundWorker1.ReportProgress(30, "Exporting to ics");
 			FileInfo icalFile = new FileInfo(Environment.GetEnvironmentVariable("temp") + "\\newcal.ics");
 			s.ToIcalFile(icalFile.FullName);
